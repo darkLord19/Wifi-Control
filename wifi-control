@@ -51,3 +51,43 @@ elif [ "OS" == "opensuse" ]; then
 		sudo zypper install dhclient -n
 	fi
 fi
+
+
+# list_interfaces(){
+	
+# 	printf "List of available Network interfaces\n\n"
+# 	count=0
+# 	shopt -s nullglob
+# 	arr=(/sys/class/net/*)
+# 	interfaces=()
+# 	for ((i=0; i<${#arr[@]}; i++)); do
+# 		if ! [ "${arr[$i]}" == "/sys/class/net/lo" ]; then
+# 			interfaces[$count]="${arr[$i]}"
+# 			((count++))
+# 		fi
+# 	done
+# 	for ((i=0;i<${#interfaces[@]}; i++)); do
+# 		interfaces[$i]=$(cut -d'/' -f5 "${interfaces[$i]}")
+# 		printf "${interfaces[$i]}\n"
+# 		# echo "HEllo"
+# 	done
+# }
+
+list_interfaces(){
+	printf "List of available Wireless Network interfaces:\n"
+	printf "$(iw dev | awk '$1=="Interface"{print $2}')\n"
+	finished=false
+	choice=""
+	while [ "$finished" == "false" ]; do
+		printf "[choice] Please Input name of interface you want to use : "
+		read choice
+		iw $choice info >/dev/null 2>&1
+		estatus=$?
+		if [ "$estatus" == "0" ]; then
+			finished=true
+		else
+			printf "Mind your fingers.\n"
+		fi
+	done
+	make_configuration $choice
+}
