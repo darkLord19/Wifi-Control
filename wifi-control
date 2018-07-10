@@ -1,13 +1,53 @@
 #!/bin/bash
-#
-#
 
 # Detect linux distro
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    OS=$NAME
+    OS=$ID
 elif type lsb_release >/dev/null 2>&1; then
     OS=$(lsb_release -si)
 else
     OS=$(uname -s)
+fi
+
+print_wpa="Installing wpa_supplicant\n"
+print_dhcp="Installing dhclient\n"
+
+# Call respective package managers
+if [ "$OS" == "ubuntu" ] || [ "$OS" == "debian" ] || [ "$OS" == "mint" ]; then
+	if ! dpkg -s wpa_supplicant >/dev/null 2>&1; then
+		printf "$print_wpa"
+		sudo apt install wpa_supplicant -y
+	fi
+	if ! dpkg -s dhclient >/dev/null 2>&1; then
+		printf "$print_dhcp"
+		sudo apt install dhclient -y
+	fi
+elif [ "$OS" == "manjaro" ] || [ "$OS"=="arch" ]; then
+	if ! pacman -Qs wpa_supplicant >/dev/null 2>&1; then
+		printf "$print_wpa"
+		sudo pacman -S wpa_supplicant --noconfirm
+	fi
+	if ! pacman -Qs dhclient >/dev/null 2>&1; then
+		printf "$print_dhcp"
+		sudo pacman -S dhclient --noconfirm
+	fi
+elif [ "$OS" == "redhat" ] || [ "$OS" == "centos" ] || [ "$OS" == "fedora" ]; then
+	if ! yum list installed wpa_supplicant >/dev/null 2>&1; then
+		printf "$print_wpa"
+		sudo yum install wpa_supplicant -y
+	fi
+	if ! yum list installed dhclient >/dev/null 2>&1; then
+		printf "$print_dhcp"
+		sudo yum install dhclient -y
+	fi
+elif [ "OS" == "opensuse" ]; then
+	if ! zypper se wpa_supplicant >/dev/null 2>&1; then
+		printf "$print_wpa"
+		sudo zypper install wpa_supplicant -n
+	fi
+	if ! zypper se dhclient >/dev/null 2>&1; then
+		printf "$print_dhcp"
+		sudo zypper install dhclient -n
+	fi
 fi
